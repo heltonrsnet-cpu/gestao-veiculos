@@ -1,0 +1,12 @@
+{
+  "veiculos": [
+    {
+      "id": "1",
+      "placa": "RVF3A46",
+      "marca": "Fiat",
+      "modelo": "Argo 1.0",
+      "ano": "2025",
+      "cor": "Branco"
+    }
+  ]
+}
