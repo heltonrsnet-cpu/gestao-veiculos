@@ -24,13 +24,42 @@ export default function VehicleForm() {
     setVeiculo({ ...veiculo, [name]: value });
   };
 
+  // NOVA FUNÇÃO: Validação rigorosa dos dados
+  const validarDados = () => {
+    const { placa, marca, modelo, ano, cor } = veiculo;
+
+    // 1. Barrar campos vazios ou preenchidos apenas com espaços
+    if (!marca.trim() || !modelo.trim() || !cor.trim() || !placa.trim() || !ano.toString().trim()) {
+      setErro('Por favor, preencha todos os campos corretamente sem deixar espaços em branco.');
+      return false;
+    }
+
+    // 2. Validar Ano (Exatamente 4 dígitos, entre 1900 e o ano limite)
+    const anoAtual = new Date().getFullYear();
+    const anoNumero = parseInt(ano, 10);
+    if (ano.toString().length !== 4 || isNaN(anoNumero) || anoNumero < 1900 || anoNumero > anoAtual + 1) {
+      setErro('Por favor, insira um ano válido com 4 dígitos.');
+      return false;
+    }
+
+    // 3. Validar Placa (Aceita o padrão antigo ABC-1234 ou Mercosul ABC1D23)
+    const placaLimpa = placa.replace("-", "").trim();
+    const regexPlaca = /^[a-zA-Z]{3}[0-9][A-Za-z0-9][0-9]{2}$/;
+    
+    if (!regexPlaca.test(placaLimpa)) {
+      setErro('Formato de placa inválido. Use os padrões ABC-1234 ou ABC1D23.');
+      return false;
+    }
+
+    return true; // Se passar por todas as regras, libera o cadastro!
+  };
+
   // Função disparada ao enviar o formulário
   const handleSubmit = async (e) => {
     e.preventDefault(); // Evita o recarregamento da página
     
-    // Validação básica: verifica se algum campo está vazio
-    if (!veiculo.placa || !veiculo.marca || !veiculo.modelo || !veiculo.ano || !veiculo.cor) {
-      setErro('Por favor, preencha todos os campos obrigatórios.');
+    // Chama a nossa nova validação. Se retornar false, interrompe o envio.
+    if (!validarDados()) {
       return;
     }
 
@@ -39,9 +68,6 @@ export default function VehicleForm() {
       await axios.post('http://localhost:3001/veiculos', veiculo);
       setErro('');
       alert('Veículo cadastrado com sucesso!');
-      
-      // Limpa o formulário (opcional, já que vamos redirecionar)
-      setVeiculo({ placa: '', marca: '', modelo: '', ano: '', cor: '' });
       
       // Redireciona de volta para a tela inicial (Listagem)
       navigate('/'); 
